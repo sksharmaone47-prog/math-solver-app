@@ -11,7 +11,7 @@ API_KEY = "AIzaSyDfhIcjotMmP4tQuZBi9buHawnDAo9uvlA"
 genai.configure(api_key=API_KEY)
 
 # MODEL NAME UPDATED TO LATEST
-model = genai.GenerativeModel('gemini-1.5-flash-latest')
+model = genai.GenerativeModel('gemini-1.5-flash')
 
 st.set_page_config(page_title="Maths Guru Pro", page_icon="🎓")
 
