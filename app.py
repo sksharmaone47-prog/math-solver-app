@@ -5,23 +5,28 @@ from gtts import gTTS
 import os
 import base64
 
-# --- 1. APNI KEY YAHAN PASTE KAREIN ---
-API_KEY = "AIzaSyCYoopuipaOM-_uJ9J9l8xfKQxTdXYggfI"
+# --- 1. CONFIGURATION ---
+API_KEY = "AIzaSyCYoopuipaOM-_uJ9J918xfKQxTdXYggfI" # Aapki key
 genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel('gemini-1.5-flash')
+
+# MODEL NAME UPDATED TO LATEST
+model = genai.GenerativeModel('gemini-1.5-flash-latest')
 
 st.set_page_config(page_title="Maths Guru Pro", page_icon="🎓")
 
 # --- 2. SPEAKER FUNCTION ---
 def play_audio(text):
-    clean_text = text.replace('*', '') # Symbols hatane ke liye
-    tts = gTTS(text=clean_text, lang='hi')
-    tts.save("ans.mp3")
-    with open("ans.mp3", "rb") as f:
-        data = f.read()
-        b64 = base64.b64encode(data).decode()
-        st.markdown(f'<audio src="data:audio/mp3;base64,{b64}" controls autoplay></audio>', unsafe_allow_html=True)
-    os.remove("ans.mp3")
+    try:
+        clean_text = text.replace('*', '') 
+        tts = gTTS(text=clean_text, lang='hi')
+        tts.save("ans.mp3")
+        with open("ans.mp3", "rb") as f:
+            data = f.read()
+            b64 = base64.b64encode(data).decode()
+            st.markdown(f'<audio src="data:audio/mp3;base64,{b64}" controls autoplay></audio>', unsafe_allow_html=True)
+        os.remove("ans.mp3")
+    except:
+        st.warning("Audio play nahi ho saka, par hal niche likha hai.")
 
 # --- 3. UI DESIGN ---
 if 'login' not in st.session_state:
@@ -35,9 +40,7 @@ if not st.session_state.login:
         st.rerun()
 else:
     st.title("🎓 Maths Guru: Class 1-12")
-    st.write("Sawal puchein aur saral bhasha mein hal payein.")
-
-    mode = st.selectbox("Kaise sawal puchna hai?", ["Photo Khichein", "Type Karein", "Bol Kar (Voice)"])
+    mode = st.selectbox("Kaise sawal puchna hai?", ["Type Karein", "Photo Khichein"])
 
     user_query = ""
     user_img = None
@@ -49,20 +52,19 @@ else:
             st.image(user_img, width=300)
 
     elif mode == "Type Karein":
-        user_query = st.text_area("Sawal yahan likhein...")
-
-    elif mode == "Bol Kar (Voice)":
-        user_query = st.text_input("Boliye (Yahan text dikhega)")
-        st.info("Tip: Keyboard ka mic button daba kar boleing.")
+        user_query = st.text_area("Sawal yahan likhein (Jaise: 2*5=)")
 
     if st.button("Hal Nikalein"):
-        with st.spinner("AI solution taiyar kar raha hai..."):
-            if user_img:
-                res = model.generate_content(["Is math question ko step-by-step saral bhasha mein solve karein.", user_img])
-            else:
-                res = model.generate_content(f"Solve this math problem simply for a student: {user_query}")
-            
-            st.session_state.result = res.text
+        with st.spinner("AI hal nikal raha hai..."):
+            try:
+                if user_img:
+                    res = model.generate_content(["Is math question ko saral hindi bhasha mein step-by-step solve karein.", user_img])
+                else:
+                    res = model.generate_content(f"Solve this math problem simply for a student: {user_query}")
+                
+                st.session_state.result = res.text
+            except Exception as e:
+                st.error(f"Error: AI model connect nahi ho pa raha. Kripya API Key check karein. {e}")
 
     if 'result' in st.session_state:
         st.success("✅ Aapka Hal:")
