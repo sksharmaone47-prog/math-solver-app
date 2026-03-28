@@ -7,8 +7,9 @@ import base64
 
 # --- 1. CONFIGURATION ---
 API_KEY = "AIzaSyDfhIcjotMmP4tQuZBi9buHawnDAo9uvlA"
-
-genai.configure(api_key=API_KEY)
+# Purana hata kar ye likhein
+genai.configure(api_key=API_KEY, transport='rest')
+model = genai.GenerativeModel('gemini-1.5-flash')
 
 # MODEL NAME UPDATED TO LATEST
 model = genai.GenerativeModel('gemini-1.5-flash')
