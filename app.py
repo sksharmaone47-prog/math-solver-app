@@ -5,15 +5,17 @@ from gtts import gTTS
 import os
 import base64
 
-# --- 1. SETTINGS & AI SETUP ---
-genai.configure(api_key="YOUR_GEMINI_API_KEY") # Apni Key yahan dalein
+# --- 1. APNI KEY YAHAN PASTE KAREIN ---
+API_KEY = "AIzaSyCYoopuipaOM-_uJ9J9l8xfKQxTdXYggfI"
+genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash')
 
-st.set_page_config(page_title="Maths Guru Pro", layout="centered", page_icon="📝")
+st.set_page_config(page_title="Maths Guru Pro", page_icon="🎓")
 
 # --- 2. SPEAKER FUNCTION ---
 def play_audio(text):
-    tts = gTTS(text=text, lang='hi')
+    clean_text = text.replace('*', '') # Symbols hatane ke liye
+    tts = gTTS(text=clean_text, lang='hi')
     tts.save("ans.mp3")
     with open("ans.mp3", "rb") as f:
         data = f.read()
@@ -21,53 +23,54 @@ def play_audio(text):
         st.markdown(f'<audio src="data:audio/mp3;base64,{b64}" controls autoplay></audio>', unsafe_allow_html=True)
     os.remove("ans.mp3")
 
-# --- 3. LOGIN PAGE ---
+# --- 3. UI DESIGN ---
 if 'login' not in st.session_state:
     st.session_state.login = False
 
 if not st.session_state.login:
-    st.title("📱 Maths Guru Login")
-    num = st.text_input("Mobile Number")
-    if st.button("Get OTP"):
-        otp = st.text_input("Enter OTP (Try: 1234)")
-        if st.button("Verify"):
-            if otp == "1234":
-                st.session_state.login = True
-                st.rerun()
+    st.title("📱 Login Karein")
+    mob = st.text_input("Mobile Number")
+    if st.button("Login"):
+        st.session_state.login = True
+        st.rerun()
 else:
-    # --- 4. MAIN APP INTERFACE ---
-    st.title("🎓 Saral Maths Solver")
-    mode = st.radio("Sawal kaise puchein?", ["Likh kar (Type)", "Photo Khichein (Camera)", "Bol kar (Voice)"])
+    st.title("🎓 Maths Guru: Class 1-12")
+    st.write("Sawal puchein aur saral bhasha mein hal payein.")
 
-    user_input = ""
-    user_image = None
+    mode = st.selectbox("Kaise sawal puchna hai?", ["Photo Khichein", "Type Karein", "Bol Kar (Voice)"])
 
-    if mode == "Likh kar (Type)":
-        user_input = st.text_area("Yahan apna sawal likhein...")
-    
-    elif mode == "Photo Khichein (Camera)":
-        img_file = st.file_uploader("Sawal ki photo upload karein", type=['jpg', 'png', 'jpeg'])
-        if img_file:
-            user_image = Image.open(img_file)
-            st.image(user_image, width=250)
+    user_query = ""
+    user_img = None
 
-    elif mode == "Bol kar (Voice)":
-        st.info("Browser Mic allow karein aur niche button dabayein.")
-        # Note: Browser mic ke liye alag se component lagta hai, simple version ke liye typing use karein
-        user_input = st.text_input("Boliye (Mic input yahan dikhega)...")
+    if mode == "Photo Khichein":
+        file = st.file_uploader("Sawal ki photo dalein", type=['jpg', 'png', 'jpeg'])
+        if file:
+            user_img = Image.open(file)
+            st.image(user_img, width=300)
 
-    # --- 5. GENERATE SOLUTION ---
-    if st.button("Hal Batayein"):
-        with st.spinner("AI hal nikal raha hai..."):
-            if user_image:
-                res = model.generate_content(["Is math question ko saral hindi-english mix mein solve karein.", user_image])
+    elif mode == "Type Karein":
+        user_query = st.text_area("Sawal yahan likhein...")
+
+    elif mode == "Bol Kar (Voice)":
+        user_query = st.text_input("Boliye (Yahan text dikhega)")
+        st.info("Tip: Keyboard ka mic button daba kar boleing.")
+
+    if st.button("Hal Nikalein"):
+        with st.spinner("AI solution taiyar kar raha hai..."):
+            if user_img:
+                res = model.generate_content(["Is math question ko step-by-step saral bhasha mein solve karein.", user_img])
             else:
-                res = model.generate_content(f"Solve this math problem simply for a student: {user_input}")
+                res = model.generate_content(f"Solve this math problem simply for a student: {user_query}")
             
-            st.session_state.ans = res.text
+            st.session_state.result = res.text
 
-    if 'ans' in st.session_state:
-        st.success("Aapka Hal:")
-        st.write(st.session_state.ans)
+    if 'result' in st.session_state:
+        st.success("✅ Aapka Hal:")
+        st.write(st.session_state.result)
         if st.button("🔈 Solution Suniye"):
-            play_audio(st.session_state.ans)
+            play_audio(st.session_state.result)
+
+    if st.sidebar.button("Logout"):
+        st.session_state.login = False
+        st.rerun()
+        
