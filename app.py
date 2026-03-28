@@ -6,7 +6,8 @@ import os
 import base64
 
 # --- 1. CONFIGURATION ---
-API_KEY = "AIzaSyCYoopuipaOM-_uJ9J918xfKQxTdXYggfI" # Aapki key
+API_KEY = "AIzaSyDfhIcjotMmP4tQuZBi9buHawnDAo9uvlA"
+
 genai.configure(api_key=API_KEY)
 
 # MODEL NAME UPDATED TO LATEST
