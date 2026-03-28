@@ -5,19 +5,18 @@ from gtts import gTTS
 import os
 import base64
 
-# --- 1. CONFIGURATION (API KEY) ---
-# Yahan apni wahi nayi wali key dalein jo aapne abhi nikali thi
+# --- CONFIGURATION ---
 API_KEY = "AIzaSyDfhIcjotMmP4tQuZBi9buHawnDAo9uvlA"
 
-# --- ERROR FIX: v1 version force karna ---
+# FORCE VERSION v1
 genai.configure(api_key=API_KEY, transport='rest')
 
-# Yahan hum model ko configure kar rahe hain
-model = genai.GenerativeModel('gemini-1.5-flash')
+# IMPORTANT: v1 model select karna
+model = genai.GenerativeModel('models/gemini-1.5-flash')
 
 st.set_page_config(page_title="Maths Guru Pro", page_icon="🎓")
 
-# --- 2. SPEAKER FUNCTION ---
+# --- FUNCTIONS ---
 def play_audio(text):
     try:
         clean_text = text.replace('*', '') 
@@ -31,7 +30,7 @@ def play_audio(text):
     except:
         st.warning("Audio play nahi ho saka.")
 
-# --- 3. UI DESIGN ---
+# --- UI ---
 if 'login' not in st.session_state:
     st.session_state.login = False
 
@@ -60,24 +59,18 @@ else:
     if st.button("Hal Nikalein"):
         with st.spinner("AI hal nikal raha hai..."):
             try:
-                # Is block mein error handling hai
                 if user_img:
                     res = model.generate_content(["Is math question ko saral hindi bhasha mein step-by-step solve karein.", user_img])
                 else:
-                    res = model.generate_content(f"Solve this math problem simply for a student in Hindi: {user_query}")
+                    res = model.generate_content(f"Solve this math problem simply for a student: {user_query}")
                 
                 st.session_state.result = res.text
             except Exception as e:
-                st.error("Model connect nahi ho pa raha. Kripya 2 minute wait karke dobara try karein.")
-                st.info(f"Technical Detail: {str(e)}")
+                st.error("Model connect nahi ho raha.")
+                st.info(f"Technical Error: {str(e)}")
 
     if 'result' in st.session_state:
         st.success("✅ Aapka Hal:")
         st.write(st.session_state.result)
         if st.button("🔈 Solution Suniye"):
             play_audio(st.session_state.result)
-
-    if st.sidebar.button("Logout"):
-        del st.session_state['login']
-        if 'result' in st.session_state: del st.session_state['result']
-        st.rerun()
