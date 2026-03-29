@@ -8,8 +8,9 @@ import base64
 # --- 1. CONFIGURATION (Aapki Nayi API Key) ---
 API_KEY = "AIzaSyAvptSpKH_NuBseXBmNhS3Igkyx7eeV0lQ"
 
-# Version aur connection fix karne ke liye ye settings
 genai.configure(api_key=API_KEY, transport='rest')
+model = genai.GenerativeModel('gemini-1.5-flash')
+
 
 # Sabse stable model select kiya hai
 model = genai.GenerativeModel('gemini-1.5-flash')
